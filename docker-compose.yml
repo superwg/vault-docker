@@ -4,21 +4,55 @@ services:
   consul-server:
     container_name: consul-server
     build: consul
+    ports:
+      - "8501:8500"
     entrypoint:
       - /opt/app/consul
       - agent
       - -server
-      - '-bootstrap-expect=1'
-      - '-data-dir=/opt/data/consul'
+      - -bootstrap-expect=1
+      - -data-dir=/opt/data/consul
       - -node=agent-one
-      - '-config-dir=/etc/consul.d'
+      - -client=0.0.0.0
+      - -config-dir=/etc/consul.d
 
-  consul-clent:
+  consul-client:
     container_name: consul-client
     build: consul
+    ports:
+      - "8502:8500"
     entrypoint:
       - /opt/app/consul
       - agent
-      - '-data-dir=/opt/data/consul'
+      - -data-dir=/opt/data/consul
       - -node=agent-two
-      - '-config-dir=/etc/consul.d'
+      - -client=0.0.0.0
+      - -config-dir=/etc/consul.d
+
+  vault-node1:
+    container_name: vault-node1
+    build: vault
+    ports:
+      - "8201:8200"
+    cap_add:
+      - IPC_LOCK
+    depends_on:
+      - consul-server
+    entrypoint:
+      - /opt/app/vault
+      - server
+      - -config=/etc/vault/vault-node1.hcl
+
+  vault-node2:
+    container_name: vault-node2
+    build: vault
+    ports:
+      - "8202:8200"
+    cap_add:
+      - IPC_LOCK
+    depends_on:
+      - consul-client
+    entrypoint:
+      - /opt/app/vault
+      - server
+      - -config=/etc/vault/vault-node2.hcl
