@@ -1,0 +1,24 @@
+version: '2'
+
+services:
+  consul-server:
+    container_name: consul-server
+    build: consul
+    entrypoint:
+      - /opt/app/consul
+      - agent
+      - -server
+      - '-bootstrap-expect=1'
+      - '-data-dir=/opt/data/consul'
+      - -node=agent-one
+      - '-config-dir=/etc/consul.d'
+
+  consul-clent:
+    container_name: consul-client
+    build: consul
+    entrypoint:
+      - /opt/app/consul
+      - agent
+      - '-data-dir=/opt/data/consul'
+      - -node=agent-two
+      - '-config-dir=/etc/consul.d'
